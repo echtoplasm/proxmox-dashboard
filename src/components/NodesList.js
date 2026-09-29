@@ -45,7 +45,8 @@ function MetricBar({ label, pct, detail }) {
   );
 }
 
-function NodesList() {
+// When nodeName is given, only that node is shown.
+function NodesList({ nodeName }) {
   const [nodes, setNodes] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -90,13 +91,20 @@ function NodesList() {
     return <div className="state-message error">Failed to load nodes: {error}</div>;
   }
 
+  const visibleNodes = nodeName ? nodes.filter((n) => n.node === nodeName) : nodes;
+
   return (
     <div className="fade-in">
-      <h2 className="panel-title">Nodes</h2>
+      <h2 className="panel-title">{nodeName ? 'Node Metrics' : 'Nodes'}</h2>
       <p className="panel-subtitle">Updates every 5 seconds</p>
 
       <div className="card-list">
-        {nodes
+        {visibleNodes.length === 0 && (
+          <div className="state-message">
+            {nodeName ? `Node "${nodeName}" not found.` : 'No nodes found.'}
+          </div>
+        )}
+        {visibleNodes
           .slice()
           .sort((a, b) => a.node.localeCompare(b.node))
           .map((node) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 function formatBytes(bytes) {
   if (!bytes && bytes !== 0) return '—';
@@ -12,42 +12,51 @@ function formatBytes(bytes) {
   return `${value.toFixed(1)} ${units[unitIndex]}`;
 }
 
-function VMManager() {
+// When nodeName is given, the manager is locked to that node and the node picker is hidden.
+function VMManager({ nodeName }) {
   const [nodes, setNodes] = useState([]);
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [pickedNode, setPickedNode] = useState(null);
+  const selectedNode = nodeName || pickedNode;
+  const currentNodeRef = useRef(selectedNode);
+  currentNodeRef.current = selectedNode;
   const [vms, setVms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
+    if (nodeName) return;
     async function fetchNodes() {
       try {
         const res = await fetch('/api/nodes');
         if (!res.ok) throw new Error(`Request failed (${res.status})`);
         const data = await res.json();
         setNodes(data);
-        if (data.length > 0) setSelectedNode(data[0].node);
+        if (data.length > 0) setPickedNode(data[0].node);
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
     }
     fetchNodes();
-  }, []);
+  }, [nodeName]);
 
   const fetchVms = useCallback(async () => {
     if (!selectedNode) return;
+    // Drop responses that arrive after the node has changed, so VMs from the
+    // previous node are never shown (or acted on) under the new one.
+    const isStale = () => currentNodeRef.current !== selectedNode;
     try {
       const res = await fetch(`/api/nodes/${selectedNode}/vms`);
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       const data = await res.json();
+      if (isStale()) return;
       setVms(data);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      if (!isStale()) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   }, [selectedNode]);
 
@@ -77,17 +86,19 @@ function VMManager() {
     <div className="fade-in">
       <h2 className="panel-title">VM Manager</h2>
 
-      <div className="node-selector">
-        {nodes.map((node) => (
-          <button
-            key={node.node}
-            className={`node-chip ${selectedNode === node.node ? 'active' : ''}`}
-            onClick={() => setSelectedNode(node.node)}
-          >
-            {node.node}
-          </button>
-        ))}
-      </div>
+      {!nodeName && (
+        <div className="node-selector">
+          {nodes.map((node) => (
+            <button
+              key={node.node}
+              className={`node-chip ${selectedNode === node.node ? 'active' : ''}`}
+              onClick={() => setPickedNode(node.node)}
+            >
+              {node.node}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading && (
         <div className="state-message">
