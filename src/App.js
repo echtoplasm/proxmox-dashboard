@@ -3,7 +3,6 @@ import './App.css';
 import ControlPanel from './components/ControlPanel';
 import DetailedDashboard from './components/DetailedDashboard';
 
-// Keep in sync with the breakpoints in App.css.
 const MONITOR_QUERY = '(min-width: 768px)';
 
 function useIsMonitor() {
@@ -21,8 +20,28 @@ function useIsMonitor() {
 
 function App() {
   const isMonitor = useIsMonitor();
-  // Lives here (not in the views) so it survives switching between them on resize.
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(
+    () => localStorage.getItem('selectedNode') || null
+  );
+
+  // Persist to localStorage when selectedNode changes
+  useEffect(() => {
+    if (selectedNode) {
+      localStorage.setItem('selectedNode', selectedNode);
+    }
+  }, [selectedNode]);
+
+  // Listen for changes from other browser windows/tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'selectedNode' && e.newValue) {
+        setSelectedNode(e.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <div className="app">

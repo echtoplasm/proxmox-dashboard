@@ -98,9 +98,14 @@ app.use(express.json());
 
 function handleError(res, err) {
   const status = err.response ? err.response.status : 500;
-  const message = err.response ? err.response.data : err.message;
-  console.error('[proxmox] request failed:', message);
-  res.status(status).json({ error: message });
+  const data = err.response?.data;
+  
+  console.error('[proxmox] request failed:');
+  console.error('  Status:', status);
+  console.error('  URL:', err.config?.url);
+  console.error('  Response:', JSON.stringify(data, null, 2));
+  
+  res.status(status).json({ error: data || err.message });
 }
 
 app.get('/api/cluster/status', async (req, res) => {
