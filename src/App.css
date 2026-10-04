@@ -86,7 +86,9 @@
   border: 1px solid #24314a;
   border-radius: 18px;
   padding: 18px;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .card:active {
@@ -202,7 +204,10 @@
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.1s ease, opacity 0.15s ease, background 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    opacity 0.15s ease,
+    background 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -341,7 +346,7 @@
 /* Views — breakpoint must match MONITOR_QUERY in App.js */
 
 /* Touch screen: ControlPanel */
-@media (max-width: 767px) {
+@media (max-width: 1424px) {
   .control-panel {
     flex: 1;
     display: flex;
@@ -364,13 +369,15 @@
   .control-panel-content {
     flex: 1;
     padding: 16px;
-    padding-bottom: 32px;
+    display: flex;
   }
 
   .node-grid {
+    flex: 1;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    grid-auto-flow: column; 
+    grid-auto-columns: 1fr;
+    gap: 16px;
   }
 
   .node-button {
@@ -380,14 +387,18 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 112px;
+    min-height: 0;
+    height: 100%;
     padding: 16px 12px;
     background: #131c2e;
     border: 2px solid #24314a;
     border-radius: 20px;
     color: #e2e8f0;
     cursor: pointer;
-    transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+    transition:
+      transform 0.1s ease,
+      background 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .node-button:active {
@@ -402,12 +413,12 @@
   }
 
   .node-button-icon {
-    font-size: 2rem;
+    font-size: 3rem;
     line-height: 1;
   }
 
   .node-button-name {
-    font-size: 1rem;
+    font-size: 1.6rem;
     font-weight: 700;
     max-width: 100%;
     overflow: hidden;
@@ -436,7 +447,7 @@
 }
 
 /* External monitor: DetailedDashboard */
-@media (min-width: 768px) {
+@media (min-width: 1425px) {
   .detailed-dashboard {
     flex: 1;
     display: flex;
@@ -525,7 +536,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1425px) {
   .dashboard-grid {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     align-items: start;
