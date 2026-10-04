@@ -8,7 +8,6 @@ function DetailedDashboard({ nodeName }) {
       <header className="app-header dashboard-header">
         <div className="dashboard-header-label">Proxmox Node</div>
         <h1>{nodeName || 'No node selected'}</h1>
-        <div className="app-header-glow" />
       </header>
 
       {nodeName ? (

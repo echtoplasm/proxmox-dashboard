@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Server } from 'lucide-react';
 
 function ControlPanel({ selectedNode, onSelectNode }) {
   const [nodes, setNodes] = useState(null);
@@ -69,7 +70,9 @@ function ControlPanel({ selectedNode, onSelectNode }) {
                       className={`status-dot ${isOnline ? 'online' : 'offline'}`}
                       title={node.status}
                     />
-                    <span className="node-button-icon">🖥️</span>
+                    <span className="node-button-icon">
+                      <Server size={48} strokeWidth={1.75} aria-hidden="true" />
+                    </span>
                     <span className="node-button-name">{node.node}</span>
                   </button>
                 );
