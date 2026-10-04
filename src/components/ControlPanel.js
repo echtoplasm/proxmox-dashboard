@@ -35,11 +35,7 @@ function ControlPanel({ selectedNode, onSelectNode }) {
 
   return (
     <div className="control-panel">
-      <header className="app-header control-panel-header">
-        <h1>Proxmox</h1>
-        <div className="control-panel-selected">{selectedNode || 'No node selected'}</div>
-        <div className="app-header-glow" />
-      </header>
+
 
       <main className="control-panel-content">
         {loading && (
