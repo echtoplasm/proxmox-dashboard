@@ -137,8 +137,13 @@ app.get('/api/nodes/:node', async (req, res) => {
 
 app.get('/api/nodes/:node/vms', async (req, res) => {
   try {
-    const data = await proxmoxRequest('get', `/nodes/${req.params.node}/qemu`);
-    res.json(data);
+    const resources = await proxmoxRequest('get', '/cluster/resources', {
+      params: { type: 'vm' },
+    });
+    const vms = resources
+      .filter((r) => r.type === 'qemu' && r.node === req.params.node)
+      .map((r) => ({ ...r, cpus: r.maxcpu })); // match /nodes/:node/qemu shape
+    res.json(vms);
   } catch (err) {
     handleError(res, err);
   }
