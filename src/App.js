@@ -3,7 +3,7 @@ import './App.css';
 import ControlPanel from './components/ControlPanel';
 import DetailedDashboard from './components/DetailedDashboard';
 
-const MONITOR_QUERY = '(min-width: 768px)';
+const MONITOR_QUERY = '(min-width: 1425px)';
 
 function useIsMonitor() {
   const [isMonitor, setIsMonitor] = useState(() => window.matchMedia(MONITOR_QUERY).matches);
