@@ -35,10 +35,13 @@ let csrfToken = null;
 let ticketExpiresAt = 0;
 
 async function authenticate() {
-  const response = await client.post('/access/ticket', new URLSearchParams({
-    username: PROXMOX_USER,
-    password: PROXMOX_PASSWORD,
-  }));
+  const response = await client.post(
+    '/access/ticket',
+    new URLSearchParams({
+      username: PROXMOX_USER,
+      password: PROXMOX_PASSWORD,
+    })
+  );
 
   const { data } = response.data;
   ticket = data.ticket;
@@ -99,12 +102,12 @@ app.use(express.json());
 function handleError(res, err) {
   const status = err.response ? err.response.status : 500;
   const data = err.response?.data;
-  
+
   console.error('[proxmox] request failed:');
   console.error('  Status:', status);
   console.error('  URL:', err.config?.url);
   console.error('  Response:', JSON.stringify(data, null, 2));
-  
+
   res.status(status).json({ error: data || err.message });
 }
 
@@ -141,9 +144,43 @@ app.get('/api/nodes/:node/vms', async (req, res) => {
       params: { type: 'vm' },
     });
     const vms = resources
-      .filter((r) => r.type === 'qemu' && r.node === req.params.node)
-      .map((r) => ({ ...r, cpus: r.maxcpu })); // match /nodes/:node/qemu shape
+      .filter(r => r.type === 'qemu' && r.node === req.params.node)
+      .map(r => ({ ...r, cpus: r.maxcpu })); // match /nodes/:node/qemu shape
     res.json(vms);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+app.get('/api/nodes/:node/lxc', async (req, res) => {
+  try {
+    const resources = await proxmoxRequest('get', '/cluster/resources', {
+      params: { type: 'vm' },
+    });
+    res.json(resources.filter((r) => r.type === 'lxc' && r.node === req.params.node));
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+app.post('/api/nodes/:node/lxc/:vmid/start', async (req, res) => {
+  try {
+    const { node, vmid } = req.params;
+    const data = await proxmoxRequest('post', `/nodes/${node}/lxc/${vmid}/status/start`);
+    res.json(data);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+app.post('/api/nodes/:node/lxc/:vmid/stop', async (req, res) => {
+  try {
+    const { node, vmid } = req.params;
+    if (Number(vmid) === 120) {
+      return res.status(403).json({ error: 'Refusing to stop the dashboard container' });
+    }
+    const data = await proxmoxRequest('post', `/nodes/${node}/lxc/${vmid}/status/stop`);
+    res.json(data);
   } catch (err) {
     handleError(res, err);
   }
@@ -184,7 +221,7 @@ const buildPath = path.join(__dirname, 'build');
 app.use(express.static(buildPath));
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
-  res.sendFile(path.join(buildPath, 'index.html'), (err) => {
+  res.sendFile(path.join(buildPath, 'index.html'), err => {
     if (err) next();
   });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import NodesList from './NodesList';
 import VMManager from './VMManager';
-
+import ContainerManager from './ContainerManager';
 function DetailedDashboard({ nodeName }) {
   return (
     <div className="detailed-dashboard">
@@ -18,6 +18,8 @@ function DetailedDashboard({ nodeName }) {
           <section className="dashboard-panel">
             <VMManager nodeName={nodeName} />
           </section>
+            <ContainerManager nodeName={nodeName} />
+          <section className="container-panel"></section>
         </main>
       ) : (
         <div className="state-message">Select a node on the touch control panel.</div>
